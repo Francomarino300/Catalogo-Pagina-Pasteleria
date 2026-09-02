@@ -277,18 +277,24 @@
  
   function esNo(v) { return String(v || '').trim().toLowerCase() === 'no'; }
   function esSi(v) { return String(v || '').trim().toLowerCase() === 'si'; }
+  function limpiarPrecio(v) {
+    // Saca cualquier cosa que no sea dígito (puntos, comas, $, espacios)
+    const soloNumeros = String(v || '').replace(/[^\d]/g, '');
+    return soloNumeros ? parseInt(soloNumeros, 10) : 0;
+  }
   function formatPrice(n) { return '$' + Number(n).toLocaleString('es-AR'); }
  
   function rowHTML(item) {
     const outOfStock = esNo(item.stock);
+    const precioLimpio = limpiarPrecio(item.precio);
     const badge = esSi(item.destacado) ? '<span class="badge">Más vendido</span>' : '';
     const priceQtyHTML = outOfStock
       ? '<div class="price-qty"><span class="price out">Sin stock</span></div>'
-      : '<div class="price-qty"><span class="price">' + formatPrice(item.precio) + '</span>' +
+      : '<div class="price-qty"><span class="price">' + formatPrice(precioLimpio) + '</span>' +
         '<div class="qty-control"><button class="qty-btn minus">−</button><span class="qty-count">0</span><button class="qty-btn plus">+</button></div></div>';
  
     return (
-      '<div class="row ' + (outOfStock ? 'out-of-stock' : '') + '" data-name="' + item.nombre + '" data-price="' + item.precio + '">' +
+      '<div class="row ' + (outOfStock ? 'out-of-stock' : '') + '" data-name="' + item.nombre + '" data-price="' + precioLimpio + '">' +
         '<div class="ph"><img src="' + item.imagen + '" alt="' + item.nombre + '" loading="lazy"></div>' +
         '<div class="info">' +
           '<div>' + badge + '<h3>' + item.nombre + '</h3><p>' + (item.descripcion || '') + '</p></div>' +
@@ -487,3 +493,4 @@
  
 </body>
 </html>
+ 
