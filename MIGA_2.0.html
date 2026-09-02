@@ -73,30 +73,68 @@
   .cat-section{padding:40px 6% 8px; scroll-margin-top:76px;}
   .cat-section h2{font-size:1.3rem; font-weight:600; margin-bottom:6px; color:var(--wine);}
   .cat-section .sub{color:var(--grey); font-size:0.9rem; margin-bottom:8px;}
+  .empty-msg{color:var(--grey); font-size:0.9rem; padding:14px 0;}
  
   .row{
     display:flex; align-items:center; gap:20px;
     padding:20px 0; border-bottom:1px solid var(--line);
+    opacity:0; transform:translateY(16px);
+    transition:opacity .55s ease, transform .55s ease;
   }
-  .row:last-child{border-bottom:none;}
+  .row.visible{ opacity:1; transform:translateY(0); }
+  .row:last-child{ border-bottom:none; }
   .row .ph{
     flex:0 0 auto; width:88px; height:88px; border-radius:50%;
     overflow:hidden; box-shadow:0 10px 22px rgba(74,20,32,0.20); border:3px solid #fff;
   }
-  .row.out-of-stock .ph{opacity:.4; filter:grayscale(70%);}
-  .row.out-of-stock h3{color:var(--grey);}
+  .row.out-of-stock .ph{ opacity:.4; filter:grayscale(70%); }
+  .row.out-of-stock h3{ color:var(--grey); }
   .row .info{flex:1 1 auto; display:flex; justify-content:space-between; align-items:center; gap:14px;}
   .row .info h3{font-size:1rem; font-weight:600;}
   .row .info p{color:var(--grey); font-size:0.86rem; margin-top:2px; max-width:32ch;}
   .row .price{font-weight:700; color:var(--red); white-space:nowrap; font-size:1rem;}
-  .row .price.out{color:var(--grey); font-weight:600; font-size:0.88rem;}
-  .empty-msg{color:var(--grey); font-size:0.9rem; padding:14px 0;}
+  .row .price.out{ color:var(--grey); font-weight:600; font-size:0.88rem; }
+ 
+  .price-qty{ display:flex; flex-direction:column; align-items:flex-end; gap:8px; flex:0 0 auto; }
+  .qty-control{
+    display:flex; align-items:center; gap:10px;
+    border:1px solid var(--line); border-radius:999px; padding:3px;
+  }
+  .qty-btn{
+    width:26px; height:26px; border-radius:50%; border:none;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1rem; font-weight:700; cursor:pointer; line-height:1;
+    background:var(--wine); color:#fff;
+  }
+  .qty-btn.minus{ background:var(--paper-soft); color:var(--wine); }
+  .qty-count{ min-width:16px; text-align:center; font-weight:600; font-size:0.9rem; }
+ 
+  /* ---------- CART FLOAT ---------- */
+  .cart-float{
+    position:fixed; bottom:22px; left:50%;
+    transform:translateX(-50%) translateY(120px);
+    background:var(--red); color:#fff; border:none; cursor:pointer;
+    padding:14px 24px; border-radius:999px; font-family:'Inter', sans-serif;
+    font-weight:700; font-size:0.92rem; display:flex; align-items:center; gap:10px;
+    box-shadow:0 12px 30px rgba(74,20,32,0.35); z-index:60;
+    opacity:0; pointer-events:none;
+    transition:transform .35s ease, opacity .35s ease;
+  }
+  .cart-float.show{ transform:translateX(-50%) translateY(0); opacity:1; pointer-events:auto; }
+  .cart-float .count{
+    background:#fff; color:var(--red); border-radius:50%;
+    width:22px; height:22px; display:flex; align-items:center; justify-content:center;
+    font-size:0.78rem; flex:0 0 auto;
+  }
+  .cart-float .total{ opacity:0.9; }
  
   @media (max-width:600px){
     .row{gap:14px;}
     .row .ph{width:72px; height:72px;}
-    .row .info{flex-direction:column; align-items:flex-start; gap:4px;}
+    .row .info{flex-direction:column; align-items:flex-start; gap:8px;}
+    .price-qty{ flex-direction:row; align-items:center; width:100%; justify-content:space-between; }
     .brand span{display:none;}
+    .cart-float{ padding:12px 18px; font-size:0.86rem; }
   }
  
   /* ---------- CONTACT ---------- */
@@ -109,7 +147,7 @@
     padding:15px 28px; font-weight:600; border-radius:2px; font-size:0.96rem;
   }
  
-  footer{padding:20px 6% 30px; text-align:center; font-size:0.82rem; color:var(--grey);}
+  footer{padding:20px 6% 80px; text-align:center; font-size:0.82rem; color:var(--grey);}
 </style>
 </head>
 <body>
@@ -160,25 +198,25 @@
 <section class="cat-section" id="tortas" data-cat="tortas">
   <h2>Tortas</h2>
   <p class="sub">Enteras, a pedido, con 48hs de anticipación.</p>
-  <div class="row-list" id="rows-tortas"></div>
+  <div id="rows-tortas"></div>
 </section>
  
 <section class="cat-section" id="cookies" data-cat="cookies">
   <h2>Cookies y alfajores</h2>
   <p class="sub">Por docena, para el mate o para regalar.</p>
-  <div class="row-list" id="rows-cookies"></div>
+  <div id="rows-cookies"></div>
 </section>
  
 <section class="cat-section" id="bocaditos" data-cat="bocaditos">
   <h2>Bocaditos dulces</h2>
   <p class="sub">Ideales para mesas dulces y cumpleaños.</p>
-  <div class="row-list" id="rows-bocaditos"></div>
+  <div id="rows-bocaditos"></div>
 </section>
  
 <section class="cat-section" id="salado" data-cat="salado">
   <h2>Salado</h2>
   <p class="sub">Para juntadas, cumples o el freezer de la semana.</p>
-  <div class="row-list" id="rows-salado"></div>
+  <div id="rows-salado"></div>
 </section>
  
 <section class="contact">
@@ -192,70 +230,69 @@
  
 <footer>@miga.pasteleria · Buenos Aires</footer>
  
+<button class="cart-float" id="cart-float" aria-label="Ver pedido">
+  <span class="count">0</span>
+  <span>Ver pedido</span>
+  <span class="total">$0</span>
+</button>
+ 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script>
   /* ============================================================
      CONEXIÓN CON GOOGLE SHEETS
      ============================================================
-     1. Creá una Google Sheet con estas columnas exactas en la
-        primera fila (los nombres son en minúscula, sin tildes):
-          categoria | nombre | descripcion | precio | stock | destacado | imagen
- 
-        - categoria: tortas / cookies / bocaditos / salado
-        - stock: si / no   -> "no" muestra "Sin stock" y apaga la foto
-        - destacado: si / no -> "si" lo suma a "Lo más vendido"
-        - imagen: link directo a la foto (subida a Google Drive con
-          acceso "cualquiera con el link", o a un hosting de imágenes)
- 
-     2. Archivo -> Compartir -> Publicar en la Web -> elegí la hoja
-        -> formato CSV -> Publicar. Copiá el link que te da.
- 
-     3. Pegalo acá abajo, reemplazando el texto entre comillas:
+     Columnas en la hoja: categoria | nombre | descripcion | precio
+     | stock | destacado | imagen
+       - categoria: tortas / cookies / bocaditos / salado
+       - stock: si / no  -> "no" muestra "Sin stock" y no deja agregar al pedido
+       - destacado: si / no -> "si" lo suma a "Lo más vendido"
+       - imagen: link directo a la foto
+     Archivo -> Compartir -> Publicar en la Web -> hoja "Productos"
+     -> formato CSV -> Publicar. Pegar ese link acá abajo.
      ============================================================ */
   const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSGltZqKiCma4fOgVfWxjod_ENdF2wdkvesF0_6pK7_tnaj_6RFGFkVj2FkLvC8gg/pub?gid=1751924898&single=true&output=csv";
  
-  /* Datos de ejemplo: se muestran mientras no conectes la hoja real,
-     así podés ver cómo se ve el sitio funcionando. */
+  /* Datos de respaldo: se usan si todavía no conectaste la hoja,
+     o si por algún motivo no se puede leer en ese momento. */
   const SAMPLE_DATA = [
-    {categoria:"tortas", nombre:"Torta de Chocolate", descripcion:"Bizcochuelo húmedo con ganache y dulce de leche.", precio:"18.500", stock:"si", destacado:"si", imagen:"https://images.pexels.com/photos/24247232/pexels-photo-24247232.jpeg"},
-    {categoria:"tortas", nombre:"Red Velvet", descripcion:"Con frosting de queso crema, clásica y suave.", precio:"19.800", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/19940993/pexels-photo-19940993.jpeg"},
-    {categoria:"tortas", nombre:"Torta Frutal", descripcion:"Frutos rojos de estación sobre crema chantilly.", precio:"17.200", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/1854652/pexels-photo-1854652.jpeg"},
-    {categoria:"tortas", nombre:"Torta de Zanahoria", descripcion:"Con frosting de queso crema y nuez.", precio:"17.800", stock:"no", destacado:"no", imagen:"https://images.pexels.com/photos/5742606/pexels-photo-5742606.jpeg"},
+    {categoria:"tortas", nombre:"Torta de Chocolate", descripcion:"Bizcochuelo húmedo con ganache y dulce de leche.", precio:"18500", stock:"si", destacado:"si", imagen:"https://images.pexels.com/photos/30699756/pexels-photo-30699756.jpeg"},
+    {categoria:"tortas", nombre:"Red Velvet", descripcion:"Con frosting de queso crema, clásica y suave.", precio:"19800", stock:"si", destacado:"no", imagen:"https://media.istockphoto.com/id/956980566/photo/delicious-baked-dessert-fresh-slice-red-velvet-cake-with-tasty-cream.jpg?b=1&s=612x612&w=0&k=20&c=hxlXbtZxGb6jmiYnOCkT4u6Xk-HVu6336U2YGgZSXmU="},
+    {categoria:"tortas", nombre:"Torta Frutal", descripcion:"Frutos rojos de estación sobre crema chantilly.", precio:"17200", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/4748363/pexels-photo-4748363.jpeg"},
+    {categoria:"tortas", nombre:"Torta de Zanahoria", descripcion:"Con frosting de queso crema y nuez.", precio:"17800", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/34952056/pexels-photo-34952056.jpeg"},
  
-    {categoria:"cookies", nombre:"Cookies de Chip", descripcion:"Chips de chocolate semi amargo, receta clásica.", precio:"6.500", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/3065512/pexels-photo-3065512.jpeg"},
-    {categoria:"cookies", nombre:"Cookies Surtidas", descripcion:"Avena, manteca de maní y doble chocolate. Docena.", precio:"6.900", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/1775283/pexels-photo-1775283.jpeg"},
-    {categoria:"cookies", nombre:"Alfajores de Maicena", descripcion:"Rellenos con dulce de leche, bañados en coco.", precio:"7.200", stock:"si", destacado:"si", imagen:"https://images.pexels.com/photos/16637678/pexels-photo-16637678.jpeg"},
-    {categoria:"cookies", nombre:"Alfajores de Chocolate", descripcion:"Bañados en chocolate negro, relleno abundante.", precio:"7.800", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/16522216/pexels-photo-16522216.jpeg"},
+    {categoria:"cookies", nombre:"Cookies de Chip", descripcion:"Chips de chocolate semi amargo, receta clásica.", precio:"6500", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/27355749/pexels-photo-27355749.jpeg"},
+    {categoria:"cookies", nombre:"Cookies Surtidas", descripcion:"Avena, manteca de maní y doble chocolate. Docena.", precio:"6900", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/12557740/pexels-photo-12557740.jpeg"},
+    {categoria:"cookies", nombre:"Alfajores de Maicena", descripcion:"Rellenos con dulce de leche, bañados en coco.", precio:"7200", stock:"si", destacado:"si", imagen:"https://media.istockphoto.com/id/1439225332/photo/alfajores-maicena-stuffed-with-dulce-de-leche-traditional-argentinian-sweet-milk.jpg?b=1&s=612x612&w=0&k=20&c=mKZrOS1kNzTCQCG-4mj3sODvPH7IxkrO1hh3_dirtPw="},
+    {categoria:"cookies", nombre:"Alfajores de Chocolate", descripcion:"Bañados en chocolate negro, relleno abundante.", precio:"7800", stock:"si", destacado:"no", imagen:"https://media.istockphoto.com/id/1174041209/photo/alfajor-with-dulce-de-leche-sweet-pastry-cake-a-traditional-argentine-dessert-with-chocolate.jpg?b=1&s=612x612&w=0&k=20&c=3l_EIGdXoCrg3Tu1PacJtlxf9XzBIO6vr8fnANPn5U8="},
  
-    {categoria:"bocaditos", nombre:"Cupcakes Decorados", descripcion:"A elección de sabor y color. Set de seis.", precio:"8.500", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/1385178/pexels-photo-1385178.jpeg"},
-    {categoria:"bocaditos", nombre:"Mini Tortas Individuales", descripcion:"Porción personal, mismos sabores que las grandes.", precio:"4.200", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/7316/bake-chocolate-cupcake-dessert.jpg"},
-    {categoria:"bocaditos", nombre:"Macarons", descripcion:"Sabores surtidos, ideal para regalar. Set de seis.", precio:"9.800", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/31807952/pexels-photo-31807952.jpeg"},
-    {categoria:"bocaditos", nombre:"Brownies", descripcion:"Bien húmedos, con nuez opcional. Bandeja x6.", precio:"7.500", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/5386659/pexels-photo-5386659.jpeg"},
+    {categoria:"bocaditos", nombre:"Cupcakes Decorados", descripcion:"A elección de sabor y color. Set de seis.", precio:"8500", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/1385178/pexels-photo-1385178.jpeg"},
+    {categoria:"bocaditos", nombre:"Mini Tortas Individuales", descripcion:"Porción personal, mismos sabores que las grandes.", precio:"4200", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/17369171/pexels-photo-17369171.jpeg"},
+    {categoria:"bocaditos", nombre:"Macarons", descripcion:"Sabores surtidos, ideal para regalar. Set de seis.", precio:"9800", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/8873350/pexels-photo-8873350.jpeg"},
+    {categoria:"bocaditos", nombre:"Brownies", descripcion:"Bien húmedos, con nuez opcional. Bandeja x6.", precio:"7500", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/5386659/pexels-photo-5386659.jpeg"},
  
-    {categoria:"salado", nombre:"Empanadas Caseras", descripcion:"Carne cortada a cuchillo, repulgo casero. Docena.", precio:"9.500", stock:"si", destacado:"si", imagen:"https://images.pexels.com/photos/37135678/pexels-photo-37135678.jpeg"},
-    {categoria:"salado", nombre:"Empanadas Árabes", descripcion:"Carne, limón y especias, receta de la abuela.", precio:"10.200", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/37135679/pexels-photo-37135679.jpeg"},
-    {categoria:"salado", nombre:"Tarta de Verdura", descripcion:"Masa casera, relleno de acelga y queso.", precio:"12.000", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/37099445/pexels-photo-37099445.jpeg"}
+    {categoria:"salado", nombre:"Empanadas Caseras", descripcion:"Carne cortada a cuchillo, repulgo casero. Docena.", precio:"9500", stock:"si", destacado:"si", imagen:"https://images.pexels.com/photos/37099445/pexels-photo-37099445.jpeg"},
+    {categoria:"salado", nombre:"Empanadas Árabes", descripcion:"Carne, limón y especias, receta de la abuela.", precio:"10200", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/37342574/pexels-photo-37342574.jpeg"},
+    {categoria:"salado", nombre:"Tarta de Verdura", descripcion:"Masa casera, relleno de acelga y queso.", precio:"12000", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/5419305/pexels-photo-5419305.jpeg"}
   ];
  
-  function esNo(valor) {
-    return String(valor || "").trim().toLowerCase() === "no";
-  }
-  function esSi(valor) {
-    return String(valor || "").trim().toLowerCase() === "si";
-  }
+  function esNo(v) { return String(v || '').trim().toLowerCase() === 'no'; }
+  function esSi(v) { return String(v || '').trim().toLowerCase() === 'si'; }
+  function formatPrice(n) { return '$' + Number(n).toLocaleString('es-AR'); }
  
   function rowHTML(item) {
     const outOfStock = esNo(item.stock);
     const badge = esSi(item.destacado) ? '<span class="badge">Más vendido</span>' : '';
-    const priceHTML = outOfStock
-      ? '<span class="price out">Sin stock</span>'
-      : '<span class="price">$' + item.precio + '</span>';
+    const priceQtyHTML = outOfStock
+      ? '<div class="price-qty"><span class="price out">Sin stock</span></div>'
+      : '<div class="price-qty"><span class="price">' + formatPrice(item.precio) + '</span>' +
+        '<div class="qty-control"><button class="qty-btn minus">−</button><span class="qty-count">0</span><button class="qty-btn plus">+</button></div></div>';
+ 
     return (
-      '<div class="row ' + (outOfStock ? 'out-of-stock' : '') + '">' +
-        '<div class="ph"><img src="' + item.imagen + '" alt="' + item.nombre + '"></div>' +
+      '<div class="row ' + (outOfStock ? 'out-of-stock' : '') + '" data-name="' + item.nombre + '" data-price="' + item.precio + '">' +
+        '<div class="ph"><img src="' + item.imagen + '" alt="' + item.nombre + '" loading="lazy"></div>' +
         '<div class="info">' +
           '<div>' + badge + '<h3>' + item.nombre + '</h3><p>' + (item.descripcion || '') + '</p></div>' +
-          priceHTML +
+          priceQtyHTML +
         '</div>' +
       '</div>'
     );
@@ -268,12 +305,10 @@
     data.forEach(item => {
       const cat = String(item.categoria || '').trim().toLowerCase();
       const containerId = categorias[cat];
-      if (containerId) {
-        document.getElementById(containerId).insertAdjacentHTML('beforeend', rowHTML(item));
-      }
+      if (containerId) document.getElementById(containerId).insertAdjacentHTML('beforeend', rowHTML(item));
     });
  
-    Object.entries(categorias).forEach(([cat, id]) => {
+    Object.values(categorias).forEach(id => {
       const container = document.getElementById(id);
       if (!container.children.length) {
         container.innerHTML = '<p class="empty-msg">Todavía no hay productos cargados en esta categoría.</p>';
@@ -304,21 +339,30 @@
     return SAMPLE_DATA;
   }
  
-  /* ---------- Menú de categorías (clic + scroll) ---------- */
+  /* ---------- NAV / SCROLL ACTIVO ---------- */
   const links = document.querySelectorAll('.cat-link');
   const sections = document.querySelectorAll('.cat-section');
   const navEl = document.querySelector('nav');
  
+  let isProgrammaticScroll = false;
+  let scrollEndTimer = null;
+ 
   function setActive(cat) {
     links.forEach(l => l.classList.toggle('active', l.dataset.cat === cat));
   }
+ 
   function scrollToSection(cat) {
     const target = document.getElementById(cat);
     if (!target) return;
     const navHeight = navEl.offsetHeight;
     const top = target.getBoundingClientRect().top + window.scrollY - navHeight - 8;
+ 
+    isProgrammaticScroll = true;
+    clearTimeout(scrollEndTimer);
     window.scrollTo({ top, behavior: 'smooth' });
+    scrollEndTimer = setTimeout(() => { isProgrammaticScroll = false; }, 700);
   }
+ 
   links.forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
@@ -327,7 +371,9 @@
       scrollToSection(cat);
     });
   });
+ 
   function updateActiveOnScroll() {
+    if (isProgrammaticScroll) return;
     const navHeight = navEl.offsetHeight;
     const refLine = navHeight + 30;
     let current = sections[0].dataset.cat;
@@ -337,16 +383,107 @@
     });
     setActive(current);
   }
+ 
+  if ('onscrollend' in window) {
+    window.addEventListener('scrollend', () => { isProgrammaticScroll = false; });
+  }
+ 
   window.addEventListener('scroll', updateActiveOnScroll, { passive: true });
   window.addEventListener('resize', updateActiveOnScroll);
  
-  /* ---------- Arranque ---------- */
+  /* ---------- FADE-IN AL ENTRAR EN PANTALLA ---------- */
+  function wireRevealObserver() {
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+ 
+    document.querySelectorAll('.row').forEach(row => revealObserver.observe(row));
+  }
+ 
+  /* ---------- CARRITO + WHATSAPP ---------- */
+  const WSP_NUMBER = '5491139437343';
+ 
+  function wireCart() {
+    const cart = {};
+    const rowsByName = {};
+ 
+    document.querySelectorAll('.row[data-name]').forEach(row => {
+      const name = row.dataset.name;
+      const price = parseInt(row.dataset.price, 10);
+      if (!cart[name]) cart[name] = { qty: 0, price };
+      if (!rowsByName[name]) rowsByName[name] = [];
+      rowsByName[name].push(row);
+    });
+ 
+    const cartFloat = document.getElementById('cart-float');
+    const cartCountEl = cartFloat.querySelector('.count');
+    const cartTotalEl = cartFloat.querySelector('.total');
+ 
+    function syncQtyDisplay(name) {
+      rowsByName[name].forEach(row => {
+        const qtyEl = row.querySelector('.qty-count');
+        if (qtyEl) qtyEl.textContent = cart[name].qty;
+      });
+    }
+ 
+    function updateCartUI() {
+      const items = Object.values(cart).filter(i => i.qty > 0);
+      const totalQty = items.reduce((s, i) => s + i.qty, 0);
+      const totalPrice = items.reduce((s, i) => s + i.qty * i.price, 0);
+      if (totalQty > 0) {
+        cartFloat.classList.add('show');
+        cartCountEl.textContent = totalQty;
+        cartTotalEl.textContent = formatPrice(totalPrice);
+      } else {
+        cartFloat.classList.remove('show');
+      }
+    }
+ 
+    Object.keys(rowsByName).forEach(name => {
+      rowsByName[name].forEach(row => {
+        const plusBtn = row.querySelector('.qty-btn.plus');
+        const minusBtn = row.querySelector('.qty-btn.minus');
+        if (!plusBtn || !minusBtn) return;
+        plusBtn.addEventListener('click', () => {
+          cart[name].qty++;
+          syncQtyDisplay(name);
+          updateCartUI();
+        });
+        minusBtn.addEventListener('click', () => {
+          if (cart[name].qty > 0) {
+            cart[name].qty--;
+            syncQtyDisplay(name);
+            updateCartUI();
+          }
+        });
+      });
+    });
+ 
+    cartFloat.onclick = () => {
+      const items = Object.entries(cart).filter(([_, i]) => i.qty > 0);
+      if (items.length === 0) return;
+      const lines = ['Hola! Quiero hacer este pedido:', ''];
+      items.forEach(([name, i]) => lines.push('- ' + i.qty + ' x ' + name));
+      const total = items.reduce((s, [_, i]) => s + i.qty * i.price, 0);
+      lines.push('', 'Total aprox: ' + formatPrice(total));
+      const msg = lines.join('\n');
+      window.open('https://wa.me/' + WSP_NUMBER + '?text=' + encodeURIComponent(msg), '_blank');
+    };
+  }
+ 
+  /* ---------- ARRANQUE ---------- */
   loadData().then(data => {
     render(data);
+    wireRevealObserver();
+    wireCart();
     updateActiveOnScroll();
   });
 </script>
  
 </body>
 </html>
- 
