@@ -4,8 +4,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MIGA — Pastelería casera</title>
+ 
+<!-- Favicon (ícono de la pestaña del navegador) -->
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><rect width="48" height="48" rx="10" fill="%23FDF0F1"/><path d="M24 8c-4 6-4 8 0 12 4-4 4-6 0-12z" fill="%23D22B3D"/><path d="M10 40 L24 20 L38 40 Z" fill="%23F2AFC4" stroke="%237A1F35" stroke-width="2.5" stroke-linejoin="round"/><circle cx="24" cy="29" r="2.6" fill="%237A1F35"/><circle cx="18" cy="35" r="2.6" fill="%237A1F35"/><circle cx="30" cy="35" r="2.6" fill="%237A1F35"/></svg>'>
+ 
+<!-- Meta tags para que se vea prolijo al compartir el link (WhatsApp, Instagram, etc.) -->
+<meta property="og:title" content="MIGA — Pastelería casera">
+<meta property="og:description" content="Tortas, cookies y bocaditos hechos en casa, a pedido. Mirá el catálogo y pedí por WhatsApp.">
+<meta property="og:image" content="https://images.pexels.com/photos/30699756/pexels-photo-30699756.jpeg">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="MIGA — Pastelería casera">
+<meta name="twitter:description" content="Tortas, cookies y bocaditos hechos en casa, a pedido.">
+<meta name="twitter:image" content="https://images.pexels.com/photos/30699756/pexels-photo-30699756.jpeg">
+ 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+ 
+<!-- Vercel Analytics -->
+<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+<script defer src="/_vercel/insights/script.js"></script>
 <style>
   :root{
     --paper:#FDF0F1;
@@ -302,6 +320,15 @@
     return soloNumeros ? parseInt(soloNumeros, 10) : 0;
   }
   function formatPrice(n) { return '$' + Number(n).toLocaleString('es-AR'); }
+  function escapeHTML(str) {
+    // Evita que texto de la Sheet (comillas, <, >, etc.) rompa el HTML o ejecute código
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
  
   function rowHTML(item) {
     const outOfStock = esNo(item.stock);
@@ -313,10 +340,10 @@
         '<div class="qty-control"><button class="qty-btn minus">−</button><span class="qty-count">0</span><button class="qty-btn plus">+</button></div></div>';
  
     return (
-      '<div class="row ' + (outOfStock ? 'out-of-stock' : '') + '" data-name="' + item.nombre + '" data-price="' + precioLimpio + '">' +
-        '<div class="ph"><img src="' + item.imagen + '" alt="' + item.nombre + '" loading="lazy"></div>' +
+      '<div class="row ' + (outOfStock ? 'out-of-stock' : '') + '" data-name="' + escapeHTML(item.nombre) + '" data-price="' + precioLimpio + '">' +
+        '<div class="ph"><img src="' + escapeHTML(item.imagen) + '" alt="' + escapeHTML(item.nombre) + '" loading="lazy"></div>' +
         '<div class="info">' +
-          '<div>' + badge + '<h3>' + item.nombre + '</h3><p>' + (item.descripcion || '') + '</p></div>' +
+          '<div>' + badge + '<h3>' + escapeHTML(item.nombre) + '</h3><p>' + escapeHTML(item.descripcion) + '</p></div>' +
           priceQtyHTML +
         '</div>' +
       '</div>'
