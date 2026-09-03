@@ -128,6 +128,19 @@
   }
   .cart-float .total{ opacity:0.9; }
  
+  /* ---------- LOADING ---------- */
+  .loading-state{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:14px; padding:70px 6%; color:var(--grey);
+  }
+  .spinner{
+    width:34px; height:34px; border:3px solid var(--line);
+    border-top-color:var(--wine); border-radius:50%;
+    animation:spin .8s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  #catalog-content{ display:none; }
+ 
   @media (max-width:600px){
     .row{gap:14px;}
     .row .ph{width:72px; height:72px;}
@@ -190,6 +203,12 @@
   </div>
 </section>
  
+<div class="loading-state" id="loading-state">
+  <div class="spinner"></div>
+  <p>Cargando el catálogo…</p>
+</div>
+ 
+<div id="catalog-content">
 <section class="best" id="best-section">
   <h2>Lo más vendido</h2>
   <div id="best-list"></div>
@@ -218,7 +237,7 @@
   <p class="sub">Para juntadas, cumples o el freezer de la semana.</p>
   <div id="rows-salado"></div>
 </section>
- 
+</div>
 <section class="contact">
   <h2>¿Querés hacer un pedido?</h2>
   <p>Contanos la fecha, para cuántas personas y qué se te ocurre.</p>
@@ -488,6 +507,9 @@
     wireRevealObserver();
     wireCart();
     updateActiveOnScroll();
+ 
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('catalog-content').style.display = 'block';
   });
 </script>
  
