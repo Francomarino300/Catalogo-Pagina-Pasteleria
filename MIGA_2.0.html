@@ -362,11 +362,27 @@
     const wspLink = 'https://wa.me/' + CONFIG.whatsapp;
     document.getElementById('nav-wsp').href = wspLink;
     document.getElementById('contact-wsp').href = wspLink;
+  }
  
-    /* Nav + secciones de categoría, generadas desde CONFIG.categories */
+  /* Devuelve solo las categorías de CONFIG que tienen al menos un producto
+     cargado en la Sheet. Si un cliente solo vende cookies, las demás
+     categorías ni se muestran en el menú ni generan una sección. */
+  function categoriasConProductos(data) {
+    const idsConDatos = new Set(
+      data.map(item => String(item.categoria || '').trim().toLowerCase())
+    );
+    return CONFIG.categories.filter(cat => idsConDatos.has(cat.id));
+  }
+ 
+  /* Arma el menú de categorías y sus secciones, solo para las que
+     efectivamente tienen productos. */
+  function buildCategoryUI(categoriasActivas) {
     const menu = document.getElementById('cat-menu');
     const sectionsWrap = document.getElementById('cat-sections');
-    CONFIG.categories.forEach((cat, i) => {
+    menu.innerHTML = '';
+    sectionsWrap.innerHTML = '';
+ 
+    categoriasActivas.forEach((cat, i) => {
       menu.insertAdjacentHTML('beforeend',
         '<a class="cat-link' + (i === 0 ? ' active' : '') + '" href="#' + cat.id + '" data-cat="' + cat.id + '">' + cat.label + '</a>'
       );
@@ -429,22 +445,15 @@
     );
   }
  
-  function render(data) {
+  function render(data, categoriasActivas) {
     const containers = {};
-    CONFIG.categories.forEach(cat => { containers[cat.id] = 'rows-' + cat.id; });
+    categoriasActivas.forEach(cat => { containers[cat.id] = 'rows-' + cat.id; });
     Object.values(containers).forEach(id => { document.getElementById(id).innerHTML = ''; });
  
     data.forEach(item => {
       const cat = String(item.categoria || '').trim().toLowerCase();
       const containerId = containers[cat];
       if (containerId) document.getElementById(containerId).insertAdjacentHTML('beforeend', rowHTML(item));
-    });
- 
-    Object.values(containers).forEach(id => {
-      const container = document.getElementById(id);
-      if (!container.children.length) {
-        container.innerHTML = '<p class="empty-msg">Todavía no hay productos cargados en esta categoría.</p>';
-      }
     });
  
     const destacados = data.filter(i => esSi(i.destacado));
@@ -608,10 +617,12 @@
  
   /* ---------- ARRANQUE ---------- */
   applyConfig();
-  wireNav();
  
   loadData().then(data => {
-    render(data);
+    const categoriasActivas = categoriasConProductos(data);
+    buildCategoryUI(categoriasActivas);
+    wireNav();
+    render(data, categoriasActivas);
     wireRevealObserver();
     wireCart();
     updateActiveOnScroll();
@@ -623,4 +634,3 @@
  
 </body>
 </html>
- 
