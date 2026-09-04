@@ -3,20 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MIGA — Pastelería casera</title>
+<title id="page-title">Catálogo</title>
  
-<!-- Favicon (ícono de la pestaña del navegador) -->
-<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><rect width="48" height="48" rx="10" fill="%23FDF0F1"/><path d="M24 8c-4 6-4 8 0 12 4-4 4-6 0-12z" fill="%23D22B3D"/><path d="M10 40 L24 20 L38 40 Z" fill="%23F2AFC4" stroke="%237A1F35" stroke-width="2.5" stroke-linejoin="round"/><circle cx="24" cy="29" r="2.6" fill="%237A1F35"/><circle cx="18" cy="35" r="2.6" fill="%237A1F35"/><circle cx="30" cy="35" r="2.6" fill="%237A1F35"/></svg>'>
+<!-- Favicon: sigue siendo un SVG a mano. Si el nuevo cliente quiere su propio
+     ícono, reemplazá el href de esta línea (no está en CONFIG a propósito,
+     porque suele requerir un dibujo distinto por cliente). -->
+<link id="favicon" rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><rect width="48" height="48" rx="10" fill="%23FDF0F1"/><path d="M24 8c-4 6-4 8 0 12 4-4 4-6 0-12z" fill="%23D22B3D"/><path d="M10 40 L24 20 L38 40 Z" fill="%23F2AFC4" stroke="%237A1F35" stroke-width="2.5" stroke-linejoin="round"/><circle cx="24" cy="29" r="2.6" fill="%237A1F35"/><circle cx="18" cy="35" r="2.6" fill="%237A1F35"/><circle cx="30" cy="35" r="2.6" fill="%237A1F35"/></svg>'>
  
-<!-- Meta tags para que se vea prolijo al compartir el link (WhatsApp, Instagram, etc.) -->
-<meta property="og:title" content="MIGA — Pastelería casera">
-<meta property="og:description" content="Tortas, cookies y bocaditos hechos en casa, a pedido. Mirá el catálogo y pedí por WhatsApp.">
-<meta property="og:image" content="https://images.pexels.com/photos/30699756/pexels-photo-30699756.jpeg">
+<!-- Meta tags para compartir el link (WhatsApp, Instagram, etc.) -->
+<meta id="meta-og-title" property="og:title" content="">
+<meta id="meta-og-desc" property="og:description" content="">
+<meta id="meta-og-image" property="og:image" content="">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="MIGA — Pastelería casera">
-<meta name="twitter:description" content="Tortas, cookies y bocaditos hechos en casa, a pedido.">
-<meta name="twitter:image" content="https://images.pexels.com/photos/30699756/pexels-photo-30699756.jpeg">
+<meta id="meta-tw-title" name="twitter:title" content="">
+<meta id="meta-tw-desc" name="twitter:description" content="">
+<meta id="meta-tw-image" name="twitter:image" content="">
  
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -84,8 +86,9 @@
   .best h2{font-size:1.15rem; font-weight:600; margin-bottom:18px; color:var(--wine);}
   .badge{
     display:inline-block; background:var(--red); color:#fff; font-size:0.7rem;
-    font-weight:700; padding:3px 10px; border-radius:999px; margin-bottom:4px;
+    font-weight:700; padding:3px 10px; border-radius:999px; margin-bottom:4px; margin-right:4px;
   }
+  .badge.oferta{ background:var(--wine); }
  
   /* ---------- LIST ---------- */
   .cat-section{padding:40px 6% 8px; scroll-margin-top:76px;}
@@ -112,6 +115,11 @@
   .row .info p{color:var(--grey); font-size:0.86rem; margin-top:2px; max-width:32ch;}
   .row .price{font-weight:700; color:var(--red); white-space:nowrap; font-size:1rem;}
   .row .price.out{ color:var(--grey); font-weight:600; font-size:0.88rem; }
+  .row .price-old{
+    color:var(--grey); font-size:0.82rem; text-decoration:line-through;
+    white-space:nowrap; margin-bottom:1px;
+  }
+  .price-block{ display:flex; flex-direction:column; align-items:flex-end; }
  
   .price-qty{ display:flex; flex-direction:column; align-items:flex-end; gap:8px; flex:0 0 auto; }
   .qty-control{
@@ -184,7 +192,7 @@
 <body>
  
 <nav>
-  <div class="brand">
+  <div class="brand" id="brand-block">
     <svg viewBox="0 0 48 48" fill="none">
       <path d="M24 6c-4 6-4 8 0 12 4-4 4-6 0-12z" fill="var(--red)"/>
       <path d="M10 40 L24 18 L38 40 Z" fill="var(--rose)" stroke="var(--wine)" stroke-width="2" stroke-linejoin="round"/>
@@ -193,15 +201,10 @@
       <circle cx="18" cy="33" r="2.4" fill="var(--wine)"/>
       <circle cx="30" cy="33" r="2.4" fill="var(--wine)"/>
     </svg>
-    <span>MIGA</span>
+    <span id="brand-name"></span>
   </div>
-  <div class="cat-menu" id="cat-menu">
-    <a class="cat-link active" href="#tortas" data-cat="tortas">Tortas</a>
-    <a class="cat-link" href="#cookies" data-cat="cookies">Cookies y alfajores</a>
-    <a class="cat-link" href="#bocaditos" data-cat="bocaditos">Bocaditos dulces</a>
-    <a class="cat-link" href="#salado" data-cat="salado">Salado</a>
-  </div>
-  <a class="nav-icon" href="https://wa.me/5491139437343" target="_blank" aria-label="WhatsApp">
+  <div class="cat-menu" id="cat-menu"><!-- se arma solo desde CONFIG.categories --></div>
+  <a class="nav-icon" id="nav-wsp" href="#" target="_blank" aria-label="WhatsApp">
     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C22 6.45 17.55 2 12.04 2zm5.8 14.1c-.24.68-1.19 1.24-1.95 1.4-.52.11-1.2.19-3.48-.75-2.92-1.21-4.8-4.17-4.95-4.36-.14-.19-1.18-1.57-1.18-3 0-1.43.75-2.13 1.02-2.42.24-.26.53-.33.71-.33.18 0 .35 0 .5.01.16.01.38-.06.6.46.24.55.8 1.9.87 2.04.07.14.12.31.02.5-.1.19-.15.31-.29.47-.14.16-.3.36-.42.48-.14.14-.29.29-.13.57.17.28.75 1.23 1.6 2 1.1 1 2.03 1.31 2.31 1.46.28.14.44.12.6-.07.17-.19.71-.83.9-1.11.19-.29.38-.24.63-.14.26.1 1.63.77 1.9.91.28.14.46.21.53.33.07.12.07.7-.17 1.38z"/></svg>
   </a>
 </nav>
@@ -216,8 +219,8 @@
     <circle cx="30" cy="33" r="2.4" fill="var(--wine)"/>
   </svg>
   <div>
-    <h1>Hecho en casa, a pedido.</h1>
-    <p>Elegí tu categoría arriba o mirá lo más pedido de la semana.</p>
+    <h1 id="hero-title"></h1>
+    <p id="hero-subtitle"></p>
   </div>
 </section>
  
@@ -232,40 +235,19 @@
   <div id="best-list"></div>
 </section>
  
-<section class="cat-section" id="tortas" data-cat="tortas">
-  <h2>Tortas</h2>
-  <p class="sub">Enteras, a pedido, con 48hs de anticipación.</p>
-  <div id="rows-tortas"></div>
-</section>
- 
-<section class="cat-section" id="cookies" data-cat="cookies">
-  <h2>Cookies y alfajores</h2>
-  <p class="sub">Por docena, para el mate o para regalar.</p>
-  <div id="rows-cookies"></div>
-</section>
- 
-<section class="cat-section" id="bocaditos" data-cat="bocaditos">
-  <h2>Bocaditos dulces</h2>
-  <p class="sub">Ideales para mesas dulces y cumpleaños.</p>
-  <div id="rows-bocaditos"></div>
-</section>
- 
-<section class="cat-section" id="salado" data-cat="salado">
-  <h2>Salado</h2>
-  <p class="sub">Para juntadas, cumples o el freezer de la semana.</p>
-  <div id="rows-salado"></div>
-</section>
+<div id="cat-sections"><!-- se arma solo desde CONFIG.categories --></div>
 </div>
+ 
 <section class="contact">
   <h2>¿Querés hacer un pedido?</h2>
   <p>Contanos la fecha, para cuántas personas y qué se te ocurre.</p>
-  <a class="btn-wsp" href="https://wa.me/5491139437343" target="_blank">
+  <a class="btn-wsp" id="contact-wsp" href="#" target="_blank">
     <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C22 6.45 17.55 2 12.04 2zm5.8 14.1c-.24.68-1.19 1.24-1.95 1.4-.52.11-1.2.19-3.48-.75-2.92-1.21-4.8-4.17-4.95-4.36-.14-.19-1.18-1.57-1.18-3 0-1.43.75-2.13 1.02-2.42.24-.26.53-.33.71-.33.18 0 .35 0 .5.01.16.01.38-.06.6.46.24.55.8 1.9.87 2.04.07.14.12.31.02.5-.1.19-.15.31-.29.47-.14.16-.3.36-.42.48-.14.14-.29.29-.13.57.17.28.75 1.23 1.6 2 1.1 1 2.03 1.31 2.31 1.46.28.14.44.12.6-.07.17-.19.71-.83.9-1.11.19-.29.38-.24.63-.14.26.1 1.63.77 1.9.91.28.14.46.21.53.33.07.12.07.7-.17 1.38z"/></svg>
     Hacer un pedido
   </a>
 </section>
  
-<footer>@miga.pasteleria · Buenos Aires</footer>
+<footer id="footer-text"></footer>
  
 <button class="cart-float" id="cart-float" aria-label="Ver pedido">
   <span class="count">0</span>
@@ -276,52 +258,118 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script>
   /* ============================================================
-     CONEXIÓN CON GOOGLE SHEETS
+     CONFIG — LO ÚNICO QUE HAY QUE TOCAR PARA UN CLIENTE NUEVO
      ============================================================
-     Columnas en la hoja: categoria | nombre | descripcion | precio
-     | stock | destacado | imagen
-       - categoria: tortas / cookies / bocaditos / salado
-       - stock: si / no  -> "no" muestra "Sin stock" y no deja agregar al pedido
-       - destacado: si / no -> "si" lo suma a "Lo más vendido"
-       - imagen: link directo a la foto
-     Archivo -> Compartir -> Publicar en la Web -> hoja "Productos"
-     -> formato CSV -> Publicar. Pegar ese link acá abajo.
+     Cambiá acá abajo: nombre, WhatsApp, colores, categorías y el
+     link del Sheets. Todo lo demás (nav, hero, secciones, footer,
+     meta tags) se arma solo a partir de esto.
+     El favicon/logo SVG queda aparte porque suele ser un dibujo
+     distinto por cliente — se edita a mano en el <head> y en el
+     nav/hero si hace falta.
      ============================================================ */
-  const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSGltZqKiCma4fOgVfWxjod_ENdF2wdkvesF0_6pK7_tnaj_6RFGFkVj2FkLvC8gg/pub?gid=1751924898&single=true&output=csv";
+  const CONFIG = {
+    brand: {
+      name: "MIGA",
+      heroTitle: "Hecho en casa, a pedido.",
+      heroSubtitle: "Elegí tu categoría arriba o mirá lo más pedido de la semana.",
+      footerText: "@miga.pasteleria · Buenos Aires",
+      ogDescription: "Tortas, cookies y bocaditos hechos en casa, a pedido. Mirá el catálogo y pedí por WhatsApp.",
+      ogImage: "https://images.pexels.com/photos/30699756/pexels-photo-30699756.jpeg"
+    },
+    whatsapp: "5491139437343",
+    sheetCsvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSGltZqKiCma4fOgVfWxjod_ENdF2wdkvesF0_6pK7_tnaj_6RFGFkVj2FkLvC8gg/pub?gid=1751924898&single=true&output=csv",
+    colors: {
+      paper: "#FDF0F1",
+      paperSoft: "#FBE1E7",
+      ink: "#4A1420",
+      wine: "#7A1F35",
+      rose: "#F2AFC4",
+      red: "#D22B3D",
+      grey: "#9C7E85"
+    },
+    /* El "id" tiene que ser corto y sin espacios (se usa como ancla #id
+       y como nombre de la columna "categoria" en el Sheets, en minúsculas). */
+    categories: [
+      { id: "tortas",    label: "Tortas",              subtitle: "Enteras, a pedido, con 48hs de anticipación." },
+      { id: "cookies",   label: "Cookies y alfajores",  subtitle: "Por docena, para el mate o para regalar." },
+      { id: "bocaditos", label: "Bocaditos dulces",     subtitle: "Ideales para mesas dulces y cumpleaños." },
+      { id: "salado",    label: "Salado",               subtitle: "Para juntadas, cumples o el freezer de la semana." }
+    ]
+  };
  
-  /* Datos de respaldo: se usan si todavía no conectaste la hoja,
-     o si por algún motivo no se puede leer en ese momento. */
+  /* ============================================================
+     DATOS DE RESPALDO — se usan si el Sheets no carga.
+     Columnas: categoria | nombre | descripcion | precio | precio_descuento
+     | stock | destacado | imagen
+       - stock: si / no
+       - destacado: si / no  -> se suma a "Lo más vendido"
+       - precio: precio normal del producto (siempre se completa).
+       - precio_descuento: opcional. Si lo cargás y es MENOR al precio
+         normal, se muestra el precio normal tachado arriba y el
+         descuento abajo, con un badge "Oferta". Si lo dejás vacío,
+         el producto se ve normal.
+     ============================================================ */
   const SAMPLE_DATA = [
-    {categoria:"tortas", nombre:"Torta de Chocolate", descripcion:"Bizcochuelo húmedo con ganache y dulce de leche.", precio:"18500", stock:"si", destacado:"si", imagen:"https://images.pexels.com/photos/30699756/pexels-photo-30699756.jpeg"},
-    {categoria:"tortas", nombre:"Red Velvet", descripcion:"Con frosting de queso crema, clásica y suave.", precio:"19800", stock:"si", destacado:"no", imagen:"https://media.istockphoto.com/id/956980566/photo/delicious-baked-dessert-fresh-slice-red-velvet-cake-with-tasty-cream.jpg?b=1&s=612x612&w=0&k=20&c=hxlXbtZxGb6jmiYnOCkT4u6Xk-HVu6336U2YGgZSXmU="},
-    {categoria:"tortas", nombre:"Torta Frutal", descripcion:"Frutos rojos de estación sobre crema chantilly.", precio:"17200", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/4748363/pexels-photo-4748363.jpeg"},
-    {categoria:"tortas", nombre:"Torta de Zanahoria", descripcion:"Con frosting de queso crema y nuez.", precio:"17800", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/34952056/pexels-photo-34952056.jpeg"},
- 
-    {categoria:"cookies", nombre:"Cookies de Chip", descripcion:"Chips de chocolate semi amargo, receta clásica.", precio:"6500", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/27355749/pexels-photo-27355749.jpeg"},
-    {categoria:"cookies", nombre:"Cookies Surtidas", descripcion:"Avena, manteca de maní y doble chocolate. Docena.", precio:"6900", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/12557740/pexels-photo-12557740.jpeg"},
-    {categoria:"cookies", nombre:"Alfajores de Maicena", descripcion:"Rellenos con dulce de leche, bañados en coco.", precio:"7200", stock:"si", destacado:"si", imagen:"https://media.istockphoto.com/id/1439225332/photo/alfajores-maicena-stuffed-with-dulce-de-leche-traditional-argentinian-sweet-milk.jpg?b=1&s=612x612&w=0&k=20&c=mKZrOS1kNzTCQCG-4mj3sODvPH7IxkrO1hh3_dirtPw="},
-    {categoria:"cookies", nombre:"Alfajores de Chocolate", descripcion:"Bañados en chocolate negro, relleno abundante.", precio:"7800", stock:"si", destacado:"no", imagen:"https://media.istockphoto.com/id/1174041209/photo/alfajor-with-dulce-de-leche-sweet-pastry-cake-a-traditional-argentine-dessert-with-chocolate.jpg?b=1&s=612x612&w=0&k=20&c=3l_EIGdXoCrg3Tu1PacJtlxf9XzBIO6vr8fnANPn5U8="},
- 
-    {categoria:"bocaditos", nombre:"Cupcakes Decorados", descripcion:"A elección de sabor y color. Set de seis.", precio:"8500", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/1385178/pexels-photo-1385178.jpeg"},
-    {categoria:"bocaditos", nombre:"Mini Tortas Individuales", descripcion:"Porción personal, mismos sabores que las grandes.", precio:"4200", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/17369171/pexels-photo-17369171.jpeg"},
-    {categoria:"bocaditos", nombre:"Macarons", descripcion:"Sabores surtidos, ideal para regalar. Set de seis.", precio:"9800", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/8873350/pexels-photo-8873350.jpeg"},
-    {categoria:"bocaditos", nombre:"Brownies", descripcion:"Bien húmedos, con nuez opcional. Bandeja x6.", precio:"7500", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/5386659/pexels-photo-5386659.jpeg"},
- 
-    {categoria:"salado", nombre:"Empanadas Caseras", descripcion:"Carne cortada a cuchillo, repulgo casero. Docena.", precio:"9500", stock:"si", destacado:"si", imagen:"https://images.pexels.com/photos/37099445/pexels-photo-37099445.jpeg"},
-    {categoria:"salado", nombre:"Empanadas Árabes", descripcion:"Carne, limón y especias, receta de la abuela.", precio:"10200", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/37342574/pexels-photo-37342574.jpeg"},
-    {categoria:"salado", nombre:"Tarta de Verdura", descripcion:"Masa casera, relleno de acelga y queso.", precio:"12000", stock:"si", destacado:"no", imagen:"https://images.pexels.com/photos/5419305/pexels-photo-5419305.jpeg"}
+    {categoria:"tortas", nombre:"Torta de Chocolate", descripcion:"Bizcochuelo húmedo con ganache y dulce de leche.", precio:"18500", precio_descuento:"", stock:"si", destacado:"si", imagen:"https://images.pexels.com/photos/30699756/pexels-photo-30699756.jpeg"},
+    {categoria:"tortas", nombre:"Red Velvet", descripcion:"Con frosting de queso crema, clásica y suave.", precio:"19800", precio_descuento:"16800", stock:"si", destacado:"no", imagen:"https://media.istockphoto.com/id/956980566/photo/delicious-baked-dessert-fresh-slice-red-velvet-cake-with-tasty-cream.jpg?b=1&s=612x612&w=0&k=20&c=hxlXbtZxGb6jmiYnOCkT4u6Xk-HVu6336U2YGgZSXmU="},
+    {categoria:"cookies", nombre:"Alfajores de Maicena", descripcion:"Rellenos con dulce de leche, bañados en coco.", precio:"7200", precio_descuento:"", stock:"si", destacado:"si", imagen:"https://media.istockphoto.com/id/1439225332/photo/alfajores-maicena-stuffed-with-dulce-de-leche-traditional-argentinian-sweet-milk.jpg?b=1&s=612x612&w=0&k=20&c=mKZrOS1kNzTCQCG-4mj3sODvPH7IxkrO1hh3_dirtPw="},
+    {categoria:"salado", nombre:"Empanadas Caseras", descripcion:"Carne cortada a cuchillo, repulgo casero. Docena.", precio:"9500", precio_descuento:"", stock:"si", destacado:"si", imagen:"https://images.pexels.com/photos/37099445/pexels-photo-37099445.jpeg"}
   ];
+ 
+  /* ---------- APLICAR CONFIG: colores, textos, meta tags ---------- */
+  function applyConfig() {
+    const c = CONFIG.colors;
+    const root = document.documentElement.style;
+    root.setProperty('--paper', c.paper);
+    root.setProperty('--paper-soft', c.paperSoft);
+    root.setProperty('--ink', c.ink);
+    root.setProperty('--wine', c.wine);
+    root.setProperty('--rose', c.rose);
+    root.setProperty('--red', c.red);
+    root.setProperty('--grey', c.grey);
+ 
+    document.title = CONFIG.brand.name + ' — Catálogo';
+    document.getElementById('brand-name').textContent = CONFIG.brand.name;
+    document.getElementById('hero-title').textContent = CONFIG.brand.heroTitle;
+    document.getElementById('hero-subtitle').textContent = CONFIG.brand.heroSubtitle;
+    document.getElementById('footer-text').textContent = CONFIG.brand.footerText;
+ 
+    document.getElementById('meta-og-title').content = CONFIG.brand.name;
+    document.getElementById('meta-og-desc').content = CONFIG.brand.ogDescription;
+    document.getElementById('meta-og-image').content = CONFIG.brand.ogImage;
+    document.getElementById('meta-tw-title').content = CONFIG.brand.name;
+    document.getElementById('meta-tw-desc').content = CONFIG.brand.ogDescription;
+    document.getElementById('meta-tw-image').content = CONFIG.brand.ogImage;
+ 
+    const wspLink = 'https://wa.me/' + CONFIG.whatsapp;
+    document.getElementById('nav-wsp').href = wspLink;
+    document.getElementById('contact-wsp').href = wspLink;
+ 
+    /* Nav + secciones de categoría, generadas desde CONFIG.categories */
+    const menu = document.getElementById('cat-menu');
+    const sectionsWrap = document.getElementById('cat-sections');
+    CONFIG.categories.forEach((cat, i) => {
+      menu.insertAdjacentHTML('beforeend',
+        '<a class="cat-link' + (i === 0 ? ' active' : '') + '" href="#' + cat.id + '" data-cat="' + cat.id + '">' + cat.label + '</a>'
+      );
+      sectionsWrap.insertAdjacentHTML('beforeend',
+        '<section class="cat-section" id="' + cat.id + '" data-cat="' + cat.id + '">' +
+          '<h2>' + cat.label + '</h2>' +
+          '<p class="sub">' + cat.subtitle + '</p>' +
+          '<div id="rows-' + cat.id + '"></div>' +
+        '</section>'
+      );
+    });
+  }
  
   function esNo(v) { return String(v || '').trim().toLowerCase() === 'no'; }
   function esSi(v) { return String(v || '').trim().toLowerCase() === 'si'; }
   function limpiarPrecio(v) {
-    // Saca cualquier cosa que no sea dígito (puntos, comas, $, espacios)
     const soloNumeros = String(v || '').replace(/[^\d]/g, '');
     return soloNumeros ? parseInt(soloNumeros, 10) : 0;
   }
   function formatPrice(n) { return '$' + Number(n).toLocaleString('es-AR'); }
   function escapeHTML(str) {
-    // Evita que texto de la Sheet (comillas, <, >, etc.) rompa el HTML o ejecute código
     return String(str || '')
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
@@ -332,18 +380,31 @@
  
   function rowHTML(item) {
     const outOfStock = esNo(item.stock);
-    const precioLimpio = limpiarPrecio(item.precio);
-    const badge = esSi(item.destacado) ? '<span class="badge">Más vendido</span>' : '';
-    const priceQtyHTML = outOfStock
-      ? '<div class="price-qty"><span class="price out">Sin stock</span></div>'
-      : '<div class="price-qty"><span class="price">' + formatPrice(precioLimpio) + '</span>' +
-        '<div class="qty-control"><button class="qty-btn minus">−</button><span class="qty-count">0</span><button class="qty-btn plus">+</button></div></div>';
+    const precioNormal = limpiarPrecio(item.precio);
+    const precioDescuento = limpiarPrecio(item.precio_descuento);
+    const hayOferta = !outOfStock && precioDescuento > 0 && precioDescuento < precioNormal;
+    const precioFinal = hayOferta ? precioDescuento : precioNormal;
+ 
+    const destacadoBadge = esSi(item.destacado) ? '<span class="badge">Más vendido</span>' : '';
+    const ofertaBadge = hayOferta ? '<span class="badge oferta">Oferta</span>' : '';
+ 
+    let priceQtyHTML;
+    if (outOfStock) {
+      priceQtyHTML = '<div class="price-qty"><span class="price out">Sin stock</span></div>';
+    } else {
+      const priceOldHTML = hayOferta ? '<span class="price-old">' + formatPrice(precioNormal) + '</span>' : '';
+      priceQtyHTML =
+        '<div class="price-qty">' +
+          '<div class="price-block">' + priceOldHTML + '<span class="price">' + formatPrice(precioFinal) + '</span></div>' +
+          '<div class="qty-control"><button class="qty-btn minus">−</button><span class="qty-count">0</span><button class="qty-btn plus">+</button></div>' +
+        '</div>';
+    }
  
     return (
-      '<div class="row ' + (outOfStock ? 'out-of-stock' : '') + '" data-name="' + escapeHTML(item.nombre) + '" data-price="' + precioLimpio + '">' +
+      '<div class="row ' + (outOfStock ? 'out-of-stock' : '') + '" data-name="' + escapeHTML(item.nombre) + '" data-price="' + precioFinal + '">' +
         '<div class="ph"><img src="' + escapeHTML(item.imagen) + '" alt="' + escapeHTML(item.nombre) + '" loading="lazy"></div>' +
         '<div class="info">' +
-          '<div>' + badge + '<h3>' + escapeHTML(item.nombre) + '</h3><p>' + escapeHTML(item.descripcion) + '</p></div>' +
+          '<div>' + destacadoBadge + ofertaBadge + '<h3>' + escapeHTML(item.nombre) + '</h3><p>' + escapeHTML(item.descripcion) + '</p></div>' +
           priceQtyHTML +
         '</div>' +
       '</div>'
@@ -351,16 +412,17 @@
   }
  
   function render(data) {
-    const categorias = { tortas: 'rows-tortas', cookies: 'rows-cookies', bocaditos: 'rows-bocaditos', salado: 'rows-salado' };
-    Object.values(categorias).forEach(id => { document.getElementById(id).innerHTML = ''; });
+    const containers = {};
+    CONFIG.categories.forEach(cat => { containers[cat.id] = 'rows-' + cat.id; });
+    Object.values(containers).forEach(id => { document.getElementById(id).innerHTML = ''; });
  
     data.forEach(item => {
       const cat = String(item.categoria || '').trim().toLowerCase();
-      const containerId = categorias[cat];
+      const containerId = containers[cat];
       if (containerId) document.getElementById(containerId).insertAdjacentHTML('beforeend', rowHTML(item));
     });
  
-    Object.values(categorias).forEach(id => {
+    Object.values(containers).forEach(id => {
       const container = document.getElementById(id);
       if (!container.children.length) {
         container.innerHTML = '<p class="empty-msg">Todavía no hay productos cargados en esta categoría.</p>';
@@ -378,9 +440,9 @@
   }
  
   async function loadData() {
-    if (SHEET_CSV_URL && SHEET_CSV_URL.startsWith('http')) {
+    if (CONFIG.sheetCsvUrl && CONFIG.sheetCsvUrl.startsWith('http')) {
       try {
-        const res = await fetch(SHEET_CSV_URL);
+        const res = await fetch(CONFIG.sheetCsvUrl);
         const csvText = await res.text();
         const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true });
         if (parsed.data && parsed.data.length) return parsed.data;
@@ -392,10 +454,8 @@
   }
  
   /* ---------- NAV / SCROLL ACTIVO ---------- */
-  const links = document.querySelectorAll('.cat-link');
-  const sections = document.querySelectorAll('.cat-section');
+  let links, sections;
   const navEl = document.querySelector('nav');
- 
   let isProgrammaticScroll = false;
   let scrollEndTimer = null;
  
@@ -415,17 +475,26 @@
     scrollEndTimer = setTimeout(() => { isProgrammaticScroll = false; }, 700);
   }
  
-  links.forEach(link => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      const cat = link.dataset.cat;
-      setActive(cat);
-      scrollToSection(cat);
+  function wireNav() {
+    links = document.querySelectorAll('.cat-link');
+    sections = document.querySelectorAll('.cat-section');
+    links.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const cat = link.dataset.cat;
+        setActive(cat);
+        scrollToSection(cat);
+      });
     });
-  });
+    if ('onscrollend' in window) {
+      window.addEventListener('scrollend', () => { isProgrammaticScroll = false; });
+    }
+    window.addEventListener('scroll', updateActiveOnScroll, { passive: true });
+    window.addEventListener('resize', updateActiveOnScroll);
+  }
  
   function updateActiveOnScroll() {
-    if (isProgrammaticScroll) return;
+    if (isProgrammaticScroll || !sections || !sections.length) return;
     const navHeight = navEl.offsetHeight;
     const refLine = navHeight + 30;
     let current = sections[0].dataset.cat;
@@ -435,13 +504,6 @@
     });
     setActive(current);
   }
- 
-  if ('onscrollend' in window) {
-    window.addEventListener('scrollend', () => { isProgrammaticScroll = false; });
-  }
- 
-  window.addEventListener('scroll', updateActiveOnScroll, { passive: true });
-  window.addEventListener('resize', updateActiveOnScroll);
  
   /* ---------- FADE-IN AL ENTRAR EN PANTALLA ---------- */
   function wireRevealObserver() {
@@ -458,8 +520,6 @@
   }
  
   /* ---------- CARRITO + WHATSAPP ---------- */
-  const WSP_NUMBER = '5491139437343';
- 
   function wireCart() {
     const cart = {};
     const rowsByName = {};
@@ -524,11 +584,14 @@
       const total = items.reduce((s, [_, i]) => s + i.qty * i.price, 0);
       lines.push('', 'Total aprox: ' + formatPrice(total));
       const msg = lines.join('\n');
-      window.open('https://wa.me/' + WSP_NUMBER + '?text=' + encodeURIComponent(msg), '_blank');
+      window.open('https://wa.me/' + CONFIG.whatsapp + '?text=' + encodeURIComponent(msg), '_blank');
     };
   }
  
   /* ---------- ARRANQUE ---------- */
+  applyConfig();
+  wireNav();
+ 
   loadData().then(data => {
     render(data);
     wireRevealObserver();
@@ -542,4 +605,3 @@
  
 </body>
 </html>
- 
