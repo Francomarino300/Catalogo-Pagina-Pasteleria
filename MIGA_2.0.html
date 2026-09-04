@@ -301,25 +301,6 @@
     ]
   };
  
-  /* ============================================================
-     DATOS DE RESPALDO — se usan si el Sheets no carga.
-     Columnas: categoria | nombre | descripcion | precio | precio_descuento
-     | stock | destacado | imagen
-       - stock: si / no
-       - destacado: si / no  -> se suma a "Lo más vendido"
-       - precio: precio normal del producto (siempre se completa).
-       - precio_descuento: opcional. Si lo cargás y es MENOR al precio
-         normal, se muestra el precio normal tachado arriba y el
-         descuento abajo, con un badge "Oferta". Si lo dejás vacío,
-         el producto se ve normal.
-     ============================================================ */
-  const SAMPLE_DATA = [
-    {categoria:"tortas", nombre:"Torta de Chocolate", descripcion:"Bizcochuelo húmedo con ganache y dulce de leche.", precio:"18500", precio_descuento:"", stock:"si", destacado:"si", imagen:"https://images.pexels.com/photos/30699756/pexels-photo-30699756.jpeg"},
-    {categoria:"tortas", nombre:"Red Velvet", descripcion:"Con frosting de queso crema, clásica y suave.", precio:"19800", precio_descuento:"16800", stock:"si", destacado:"no", imagen:"https://media.istockphoto.com/id/956980566/photo/delicious-baked-dessert-fresh-slice-red-velvet-cake-with-tasty-cream.jpg?b=1&s=612x612&w=0&k=20&c=hxlXbtZxGb6jmiYnOCkT4u6Xk-HVu6336U2YGgZSXmU="},
-    {categoria:"cookies", nombre:"Alfajores de Maicena", descripcion:"Rellenos con dulce de leche, bañados en coco.", precio:"7200", precio_descuento:"", stock:"si", destacado:"si", imagen:"https://media.istockphoto.com/id/1439225332/photo/alfajores-maicena-stuffed-with-dulce-de-leche-traditional-argentinian-sweet-milk.jpg?b=1&s=612x612&w=0&k=20&c=mKZrOS1kNzTCQCG-4mj3sODvPH7IxkrO1hh3_dirtPw="},
-    {categoria:"salado", nombre:"Empanadas Caseras", descripcion:"Carne cortada a cuchillo, repulgo casero. Docena.", precio:"9500", precio_descuento:"", stock:"si", destacado:"si", imagen:"https://images.pexels.com/photos/37099445/pexels-photo-37099445.jpeg"}
-  ];
- 
   /* Convierte un hex (#RRGGBB) a "r,g,b" para poder armar un rgba() */
   function hexToRgbParts(hex) {
     const clean = String(hex || '').replace('#', '');
@@ -362,11 +343,27 @@
     const wspLink = 'https://wa.me/' + CONFIG.whatsapp;
     document.getElementById('nav-wsp').href = wspLink;
     document.getElementById('contact-wsp').href = wspLink;
+  }
  
-    /* Nav + secciones de categoría, generadas desde CONFIG.categories */
+  /* Devuelve solo las categorías de CONFIG que tienen al menos un producto
+     cargado en la Sheet. Si un cliente solo vende cookies, las demás
+     categorías ni se muestran en el menú ni generan una sección. */
+  function categoriasConProductos(data) {
+    const idsConDatos = new Set(
+      data.filter(esVisible).map(item => String(item.categoria || '').trim().toLowerCase())
+    );
+    return CONFIG.categories.filter(cat => idsConDatos.has(cat.id));
+  }
+ 
+  /* Arma el menú de categorías y sus secciones, solo para las que
+     efectivamente tienen productos. */
+  function buildCategoryUI(categoriasActivas) {
     const menu = document.getElementById('cat-menu');
     const sectionsWrap = document.getElementById('cat-sections');
-    CONFIG.categories.forEach((cat, i) => {
+    menu.innerHTML = '';
+    sectionsWrap.innerHTML = '';
+ 
+    categoriasActivas.forEach((cat, i) => {
       menu.insertAdjacentHTML('beforeend',
         '<a class="cat-link' + (i === 0 ? ' active' : '') + '" href="#' + cat.id + '" data-cat="' + cat.id + '">' + cat.label + '</a>'
       );
@@ -382,6 +379,11 @@
  
   function esNo(v) { return String(v || '').trim().toLowerCase() === 'no'; }
   function esSi(v) { return String(v || '').trim().toLowerCase() === 'si'; }
+  function esVisible(item) {
+    // Si la columna "visible" no existe o está vacía, se trata como "si"
+    // (así una Sheet vieja sin esta columna sigue funcionando igual).
+    return !esNo(item.visible);
+  }
   function limpiarPrecio(v) {
     const soloNumeros = String(v || '').replace(/[^\d]/g, '');
     return soloNumeros ? parseInt(soloNumeros, 10) : 0;
@@ -429,25 +431,20 @@
     );
   }
  
-  function render(data) {
+  function render(data, categoriasActivas) {
+    const dataVisible = data.filter(esVisible);
+ 
     const containers = {};
-    CONFIG.categories.forEach(cat => { containers[cat.id] = 'rows-' + cat.id; });
+    categoriasActivas.forEach(cat => { containers[cat.id] = 'rows-' + cat.id; });
     Object.values(containers).forEach(id => { document.getElementById(id).innerHTML = ''; });
  
-    data.forEach(item => {
+    dataVisible.forEach(item => {
       const cat = String(item.categoria || '').trim().toLowerCase();
       const containerId = containers[cat];
       if (containerId) document.getElementById(containerId).insertAdjacentHTML('beforeend', rowHTML(item));
     });
  
-    Object.values(containers).forEach(id => {
-      const container = document.getElementById(id);
-      if (!container.children.length) {
-        container.innerHTML = '<p class="empty-msg">Todavía no hay productos cargados en esta categoría.</p>';
-      }
-    });
- 
-    const destacados = data.filter(i => esSi(i.destacado));
+    const destacados = dataVisible.filter(i => esSi(i.destacado));
     const bestSection = document.getElementById('best-section');
     if (destacados.length) {
       document.getElementById('best-list').innerHTML = destacados.map(rowHTML).join('');
@@ -458,17 +455,21 @@
   }
  
   async function loadData() {
-    if (CONFIG.sheetCsvUrl && CONFIG.sheetCsvUrl.startsWith('http')) {
-      try {
-        const res = await fetch(CONFIG.sheetCsvUrl);
-        const csvText = await res.text();
-        const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true });
-        if (parsed.data && parsed.data.length) return parsed.data;
-      } catch (e) {
-        console.warn('No se pudo leer la hoja de cálculo, usando datos de ejemplo.', e);
-      }
+    if (!CONFIG.sheetCsvUrl || !CONFIG.sheetCsvUrl.startsWith('http')) {
+      console.warn('No hay un link de Google Sheets configurado en CONFIG.sheetCsvUrl.');
+      return null;
     }
-    return SAMPLE_DATA;
+    try {
+      const res = await fetch(CONFIG.sheetCsvUrl);
+      const csvText = await res.text();
+      const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true });
+      if (parsed.data && parsed.data.length) return parsed.data;
+      console.warn('La hoja de cálculo respondió pero no trajo productos.');
+      return null;
+    } catch (e) {
+      console.warn('No se pudo leer la hoja de cálculo.', e);
+      return null;
+    }
   }
  
   /* ---------- NAV / SCROLL ACTIVO ---------- */
@@ -608,10 +609,25 @@
  
   /* ---------- ARRANQUE ---------- */
   applyConfig();
-  wireNav();
+ 
+  function mostrarErrorCarga() {
+    document.getElementById('loading-state').innerHTML =
+      '<p>No pudimos cargar el catálogo en este momento.</p>' +
+      '<p style="font-size:0.85rem;">Puede ser un problema momentáneo de conexión.</p>' +
+      '<button id="retry-btn" style="margin-top:6px; background:var(--wine); color:#fff; border:none; padding:10px 20px; border-radius:999px; font-family:\'Inter\',sans-serif; font-weight:600; font-size:0.88rem; cursor:pointer;">Reintentar</button>';
+    document.getElementById('retry-btn').addEventListener('click', () => window.location.reload());
+  }
  
   loadData().then(data => {
-    render(data);
+    if (!data || !data.length) {
+      mostrarErrorCarga();
+      return;
+    }
+ 
+    const categoriasActivas = categoriasConProductos(data);
+    buildCategoryUI(categoriasActivas);
+    wireNav();
+    render(data, categoriasActivas);
     wireRevealObserver();
     wireCart();
     updateActiveOnScroll();
@@ -623,4 +639,3 @@
  
 </body>
 </html>
- 
