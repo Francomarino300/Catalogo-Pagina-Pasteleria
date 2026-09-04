@@ -285,7 +285,11 @@
       wine: "#7A1F35",
       rose: "#F2AFC4",
       red: "#D22B3D",
-      grey: "#9C7E85"
+      grey: "#9C7E85",
+      /* Color de bordes/divisores. Si no lo tocás, se arma solo a partir
+         de "ink" con transparencia, así siempre combina con la paleta
+         del cliente sin que tengas que calcularlo a mano. */
+      line: null
     },
     /* El "id" tiene que ser corto y sin espacios (se usa como ancla #id
        y como nombre de la columna "categoria" en el Sheets, en minúsculas). */
@@ -316,6 +320,15 @@
     {categoria:"salado", nombre:"Empanadas Caseras", descripcion:"Carne cortada a cuchillo, repulgo casero. Docena.", precio:"9500", precio_descuento:"", stock:"si", destacado:"si", imagen:"https://images.pexels.com/photos/37099445/pexels-photo-37099445.jpeg"}
   ];
  
+  /* Convierte un hex (#RRGGBB) a "r,g,b" para poder armar un rgba() */
+  function hexToRgbParts(hex) {
+    const clean = String(hex || '').replace('#', '');
+    const full = clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean;
+    const num = parseInt(full, 16);
+    if (isNaN(num)) return '0,0,0';
+    return [(num >> 16) & 255, (num >> 8) & 255, num & 255].join(',');
+  }
+ 
   /* ---------- APLICAR CONFIG: colores, textos, meta tags ---------- */
   function applyConfig() {
     const c = CONFIG.colors;
@@ -327,6 +340,11 @@
     root.setProperty('--rose', c.rose);
     root.setProperty('--red', c.red);
     root.setProperty('--grey', c.grey);
+ 
+    // Si no se definió un "line" a mano, se arma solo a partir de "ink"
+    // con transparencia, así siempre combina con la paleta del cliente.
+    const lineColor = c.line || ('rgba(' + hexToRgbParts(c.ink) + ',0.14)');
+    root.setProperty('--line', lineColor);
  
     document.title = CONFIG.brand.name + ' — Catálogo';
     document.getElementById('brand-name').textContent = CONFIG.brand.name;
@@ -605,3 +623,4 @@
  
 </body>
 </html>
+ 
