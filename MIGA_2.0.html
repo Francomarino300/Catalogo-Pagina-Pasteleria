@@ -301,30 +301,6 @@
     ]
   };
  
-  /* ============================================================
-     DATOS DE RESPALDO — se usan si el Sheets no carga.
-     Columnas: categoria | nombre | descripcion | precio | precio_descuento
-     | stock | destacado | visible | imagen
-       - stock: si / no  -> "no" se sigue mostrando pero con "Sin stock"
-       - visible: si / no (o vacío = si)  -> "no" OCULTA el producto por
-         completo, como si no existiera. Sirve para pausar la venta de
-         algo sin que parezca "sin stock" (ej: temporada, descontinuado,
-         o para probar qué pasa si una categoría entera queda sin nada
-         visible: la categoría directamente desaparece del menú).
-       - destacado: si / no  -> se suma a "Lo más vendido"
-       - precio: precio normal del producto (siempre se completa).
-       - precio_descuento: opcional. Si lo cargás y es MENOR al precio
-         normal, se muestra el precio normal tachado arriba y el
-         descuento abajo, con un badge "Oferta". Si lo dejás vacío,
-         el producto se ve normal.
-     ============================================================ */
-  const SAMPLE_DATA = [
-    {categoria:"tortas", nombre:"Torta de Chocolate", descripcion:"Bizcochuelo húmedo con ganache y dulce de leche.", precio:"18500", precio_descuento:"", stock:"si", destacado:"si", visible:"si", imagen:"https://images.pexels.com/photos/30699756/pexels-photo-30699756.jpeg"},
-    {categoria:"tortas", nombre:"Red Velvet", descripcion:"Con frosting de queso crema, clásica y suave.", precio:"19800", precio_descuento:"16800", stock:"si", destacado:"no", visible:"si", imagen:"https://media.istockphoto.com/id/956980566/photo/delicious-baked-dessert-fresh-slice-red-velvet-cake-with-tasty-cream.jpg?b=1&s=612x612&w=0&k=20&c=hxlXbtZxGb6jmiYnOCkT4u6Xk-HVu6336U2YGgZSXmU="},
-    {categoria:"cookies", nombre:"Alfajores de Maicena", descripcion:"Rellenos con dulce de leche, bañados en coco.", precio:"7200", precio_descuento:"", stock:"si", destacado:"si", visible:"si", imagen:"https://media.istockphoto.com/id/1439225332/photo/alfajores-maicena-stuffed-with-dulce-de-leche-traditional-argentinian-sweet-milk.jpg?b=1&s=612x612&w=0&k=20&c=mKZrOS1kNzTCQCG-4mj3sODvPH7IxkrO1hh3_dirtPw="},
-    {categoria:"salado", nombre:"Empanadas Caseras", descripcion:"Carne cortada a cuchillo, repulgo casero. Docena.", precio:"9500", precio_descuento:"", stock:"si", destacado:"si", visible:"no", imagen:"https://images.pexels.com/photos/37099445/pexels-photo-37099445.jpeg"}
-  ];
- 
   /* Convierte un hex (#RRGGBB) a "r,g,b" para poder armar un rgba() */
   function hexToRgbParts(hex) {
     const clean = String(hex || '').replace('#', '');
@@ -479,17 +455,21 @@
   }
  
   async function loadData() {
-    if (CONFIG.sheetCsvUrl && CONFIG.sheetCsvUrl.startsWith('http')) {
-      try {
-        const res = await fetch(CONFIG.sheetCsvUrl);
-        const csvText = await res.text();
-        const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true });
-        if (parsed.data && parsed.data.length) return parsed.data;
-      } catch (e) {
-        console.warn('No se pudo leer la hoja de cálculo, usando datos de ejemplo.', e);
-      }
+    if (!CONFIG.sheetCsvUrl || !CONFIG.sheetCsvUrl.startsWith('http')) {
+      console.warn('No hay un link de Google Sheets configurado en CONFIG.sheetCsvUrl.');
+      return null;
     }
-    return SAMPLE_DATA;
+    try {
+      const res = await fetch(CONFIG.sheetCsvUrl);
+      const csvText = await res.text();
+      const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true });
+      if (parsed.data && parsed.data.length) return parsed.data;
+      console.warn('La hoja de cálculo respondió pero no trajo productos.');
+      return null;
+    } catch (e) {
+      console.warn('No se pudo leer la hoja de cálculo.', e);
+      return null;
+    }
   }
  
   /* ---------- NAV / SCROLL ACTIVO ---------- */
@@ -630,7 +610,20 @@
   /* ---------- ARRANQUE ---------- */
   applyConfig();
  
+  function mostrarErrorCarga() {
+    document.getElementById('loading-state').innerHTML =
+      '<p>No pudimos cargar el catálogo en este momento.</p>' +
+      '<p style="font-size:0.85rem;">Puede ser un problema momentáneo de conexión.</p>' +
+      '<button id="retry-btn" style="margin-top:6px; background:var(--wine); color:#fff; border:none; padding:10px 20px; border-radius:999px; font-family:\'Inter\',sans-serif; font-weight:600; font-size:0.88rem; cursor:pointer;">Reintentar</button>';
+    document.getElementById('retry-btn').addEventListener('click', () => window.location.reload());
+  }
+ 
   loadData().then(data => {
+    if (!data || !data.length) {
+      mostrarErrorCarga();
+      return;
+    }
+ 
     const categoriasActivas = categoriasConProductos(data);
     buildCategoryUI(categoriasActivas);
     wireNav();
