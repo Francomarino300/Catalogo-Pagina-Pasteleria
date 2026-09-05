@@ -259,13 +259,6 @@
 <script>
   /* ============================================================
      CONFIG — LO ÚNICO QUE HAY QUE TOCAR PARA UN CLIENTE NUEVO
-     ============================================================
-     Cambiá acá abajo: nombre, WhatsApp, colores, categorías y el
-     link del Sheets. Todo lo demás (nav, hero, secciones, footer,
-     meta tags) se arma solo a partir de esto.
-     El favicon/logo SVG queda aparte porque suele ser un dibujo
-     distinto por cliente — se edita a mano en el <head> y en el
-     nav/hero si hace falta.
      ============================================================ */
   const CONFIG = {
     brand: {
@@ -286,13 +279,8 @@
       rose: "#F2AFC4",
       red: "#D22B3D",
       grey: "#9C7E85",
-      /* Color de bordes/divisores. Si no lo tocás, se arma solo a partir
-         de "ink" con transparencia, así siempre combina con la paleta
-         del cliente sin que tengas que calcularlo a mano. */
       line: null
     },
-    /* El "id" tiene que ser corto y sin espacios (se usa como ancla #id
-       y como nombre de la columna "categoria" en el Sheets, en minúsculas). */
     categories: [
       { id: "tortas",    label: "Tortas",              subtitle: "Enteras, a pedido, con 48hs de anticipación." },
       { id: "cookies",   label: "Cookies y alfajores",  subtitle: "Por docena, para el mate o para regalar." },
@@ -301,13 +289,24 @@
     ]
   };
  
-  /* Convierte un hex (#RRGGBB) a "r,g,b" para poder armar un rgba() */
   function hexToRgbParts(hex) {
     const clean = String(hex || '').replace('#', '');
     const full = clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean;
     const num = parseInt(full, 16);
     if (isNaN(num)) return '0,0,0';
     return [(num >> 16) & 255, (num >> 8) & 255, num & 255].join(',');
+  }
+ 
+  /* ---------- OPTIMIZACIÓN DE IMÁGENES (wsrv.nl) ----------
+     Redimensiona/comprime al vuelo las fotos que carga el cliente en la
+     Sheet (que a veces vienen pesadísimas desde el celular). No requiere
+     cuenta ni API key. Devuelve WebP recortado cuadrado (fit=cover) al
+     tamaño pedido, así el navegador del comprador nunca baja el original. */
+  function optimizarImagen(url, ancho = 200) {
+    if (!url) return url;
+    const limpio = url.replace(/^https?:\/\//, '');
+    return 'https://wsrv.nl/?url=' + encodeURIComponent(limpio) +
+      '&w=' + ancho + '&h=' + ancho + '&fit=cover&q=75&output=webp';
   }
  
   /* ---------- APLICAR CONFIG: colores, textos, meta tags ---------- */
@@ -322,8 +321,6 @@
     root.setProperty('--red', c.red);
     root.setProperty('--grey', c.grey);
  
-    // Si no se definió un "line" a mano, se arma solo a partir de "ink"
-    // con transparencia, así siempre combina con la paleta del cliente.
     const lineColor = c.line || ('rgba(' + hexToRgbParts(c.ink) + ',0.14)');
     root.setProperty('--line', lineColor);
  
@@ -345,9 +342,6 @@
     document.getElementById('contact-wsp').href = wspLink;
   }
  
-  /* Devuelve solo las categorías de CONFIG que tienen al menos un producto
-     cargado en la Sheet. Si un cliente solo vende cookies, las demás
-     categorías ni se muestran en el menú ni generan una sección. */
   function categoriasConProductos(data) {
     const idsConDatos = new Set(
       data.filter(esVisible).map(item => String(item.categoria || '').trim().toLowerCase())
@@ -355,8 +349,6 @@
     return CONFIG.categories.filter(cat => idsConDatos.has(cat.id));
   }
  
-  /* Arma el menú de categorías y sus secciones, solo para las que
-     efectivamente tienen productos. */
   function buildCategoryUI(categoriasActivas) {
     const menu = document.getElementById('cat-menu');
     const sectionsWrap = document.getElementById('cat-sections');
@@ -380,8 +372,6 @@
   function esNo(v) { return String(v || '').trim().toLowerCase() === 'no'; }
   function esSi(v) { return String(v || '').trim().toLowerCase() === 'si'; }
   function esVisible(item) {
-    // Si la columna "visible" no existe o está vacía, se trata como "si"
-    // (así una Sheet vieja sin esta columna sigue funcionando igual).
     return !esNo(item.visible);
   }
   function limpiarPrecio(v) {
@@ -422,7 +412,7 @@
  
     return (
       '<div class="row ' + (outOfStock ? 'out-of-stock' : '') + '" data-name="' + escapeHTML(item.nombre) + '" data-price="' + precioFinal + '">' +
-        '<div class="ph"><img src="' + escapeHTML(item.imagen) + '" alt="' + escapeHTML(item.nombre) + '" loading="lazy"></div>' +
+        '<div class="ph"><img src="' + escapeHTML(optimizarImagen(item.imagen, 200)) + '" alt="' + escapeHTML(item.nombre) + '" loading="lazy"></div>' +
         '<div class="info">' +
           '<div>' + destacadoBadge + ofertaBadge + '<h3>' + escapeHTML(item.nombre) + '</h3><p>' + escapeHTML(item.descripcion) + '</p></div>' +
           priceQtyHTML +
